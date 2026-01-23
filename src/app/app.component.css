@@ -2,8 +2,7 @@
   min-height: 100vh;
 }
 
-:host ::ng-deep .ant-layout-sider {
-  overflow-y: auto;
+:host ::ng-deep .ant-layout-sider {  
   height: 100vh;
   position: fixed;
   left: 0;

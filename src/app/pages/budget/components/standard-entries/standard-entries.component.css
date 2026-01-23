@@ -1,0 +1,15 @@
+.standard-entries-container {
+  padding: 24px;
+  background: white;
+  min-height: 100%;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}

@@ -1,0 +1,31 @@
+.budget-view-container {
+  padding: 16px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent container from scrolling, internal grid should scroll */
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+
+.budgets-grid {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 16px;
+  flex: 1; /* Take remaining height */
+  align-items: stretch; /* Cards stretch to full height */
+}
+
+.budget-card-wrapper {
+  min-width: calc((100% - (16px * 5)) / 6); /* Show 6 items fully */
+  flex-shrink: 0;
+  height: 100%; /* Force wrapper to full height of grid */
+}

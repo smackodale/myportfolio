@@ -1,0 +1,25 @@
+<div class="budget-view-container">
+  <div class="header-actions">
+    <div>
+      <span style="margin-right: 8px">Show Past Budgets</span>
+      <nz-switch [ngModel]="showPast()" (ngModelChange)="onShowPastChange($event)"></nz-switch>
+    </div>
+    <div style="display: flex; gap: 8px">
+      <button nz-button nzType="default" (click)="onAddNextBudget()">Add Next Week</button>
+      <a nz-button nzType="primary" routerLink="standard">Manage Standard Entries</a>
+    </div>
+  </div>
+
+  <nz-spin
+    [nzSpinning]="isLoading()"
+    style="flex: 1; min-height: 0; display: flex; flex-direction: column"
+  >
+    <div class="budgets-grid">
+      @for (budget of budgets(); track budget.weekId) {
+        <div class="budget-card-wrapper">
+          <app-budget-card [budget]="budget" (reset)="onResetBudget($event)"></app-budget-card>
+        </div>
+      }
+    </div>
+  </nz-spin>
+</div>

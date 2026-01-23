@@ -1,0 +1,112 @@
+<div class="standard-entries-container">
+  <div class="header">
+    <h2>Standard Entries</h2>
+    <div class="actions">
+      <a nz-button nzType="default" routerLink="..">Back to Budgets</a>
+      <button nz-button nzType="primary" (click)="openAddModal()">Add Entry</button>
+    </div>
+  </div>
+
+  <nz-table #basicTable [nzData]="entries()" [nzLoading]="isLoading()">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Frequency</th>
+        <th>Next Occurrence</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (data of basicTable.data; track data.id) {
+        <tr>
+          <td>{{ data.name }}</td>
+          <td>
+            <span [style.color]="data.type === 'Income' ? 'green' : 'red'">{{ data.type }}</span>
+          </td>
+          <td>{{ data.amount | currency }}</td>
+          <td>{{ data.frequency }}</td>
+          <td>
+            {{ data.frequency !== 'Weekly' ? (data.nextOccurrence | date: 'dd/MM/yyyy') : '-' }}
+          </td>
+          <td>
+            <a (click)="openEditModal(data)">Edit</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a
+              nz-popconfirm
+              nzPopconfirmTitle="Sure to delete?"
+              (nzOnConfirm)="deleteEntry(data.id)"
+              >Delete</a
+            >
+          </td>
+        </tr>
+      }
+    </tbody>
+  </nz-table>
+
+  <nz-modal
+    [(nzVisible)]="isModalVisible"
+    [nzTitle]="isEditMode() ? 'Edit Entry' : 'Add Entry'"
+    (nzOnCancel)="handleCancel()"
+    (nzOnOk)="handleOk()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="entryForm" nzLayout="vertical">
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">Name</nz-form-label>
+          <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please input the name!">
+            <input nz-input formControlName="name" id="name" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="type">Type</nz-form-label>
+          <nz-form-control [nzSm]="14" [nzXs]="24">
+            <nz-select formControlName="type" id="type">
+              @for (t of entryTypes; track t) {
+                <nz-option [nzValue]="t" [nzLabel]="t"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="amount">Amount</nz-form-label>
+          <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please input a valid amount!">
+            <nz-input-number
+              formControlName="amount"
+              id="amount"
+              [nzMin]="0.01"
+              style="width: 100%"
+            ></nz-input-number>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="frequency"
+            >Frequency</nz-form-label
+          >
+          <nz-form-control [nzSm]="14" [nzXs]="24">
+            <nz-select formControlName="frequency" id="frequency">
+              @for (f of frequencies; track f) {
+                <nz-option [nzValue]="f" [nzLabel]="f"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        @if (showNextOccurrence()) {
+          <nz-form-item>
+            <nz-form-label [nzSm]="8" [nzXs]="24" nzRequired nzFor="nextOccurrence"
+              >Next Occurrence</nz-form-label
+            >
+            <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please select data">
+              <nz-date-picker formControlName="nextOccurrence" id="nextOccurrence"></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        }
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

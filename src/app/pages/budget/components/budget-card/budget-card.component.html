@@ -1,0 +1,57 @@
+<nz-card
+  [nzTitle]="titleTemplate"
+  [nzExtra]="extraTemplate"
+  class="budget-card"
+  [class.past-budget]="budget().isPast"
+>
+  <div class="summary-section">
+    <div class="summary-row income">
+      <span>Income</span>
+      <span>{{ budget().totalIncome | currency }}</span>
+    </div>
+    <div class="summary-row expense">
+      <span>Expenses</span>
+      <span>{{ budget().totalExpenses | currency }}</span>
+    </div>
+    <div class="summary-row total">
+      <span>Total</span>
+      <span [class.positive]="budget().weekTotal >= 0" [class.negative]="budget().weekTotal < 0">
+        {{ budget().weekTotal | currency }}
+      </span>
+    </div>
+    <div class="summary-row savings">
+      <span>Running Savings</span>
+      <span>{{ budget().runningSavings | currency }}</span>
+    </div>
+  </div>
+
+  <div class="entries-list">
+    <!-- Collapsible or scrollable list of entries could go here -->
+    @for (entry of budget().entries; track entry.id) {
+      <div class="entry-row">
+        <span
+          [class.income-text]="entry.type === 'Income'"
+          [class.expense-text]="entry.type === 'Expense'"
+        >
+          {{ entry.name }}
+        </span>
+        <span>{{ entry.amount | currency }}</span>
+      </div>
+    }
+  </div>
+</nz-card>
+
+<ng-template #titleTemplate>
+  <div class="card-title">
+    <span>{{ budget().fyWeekLabel }}</span>
+    <span class="date-range"
+      >{{ budget().startDate | date: 'dd/MM' }} - {{ budget().endDate | date: 'dd/MM' }}</span
+    >
+  </div>
+</ng-template>
+
+<ng-template #extraTemplate>
+  <button nz-button nzType="text" nzDanger (click)="onReset()" title="Reset to Standard">
+    <span nz-icon nzType="reload"></span>
+  </button>
+</ng-template>

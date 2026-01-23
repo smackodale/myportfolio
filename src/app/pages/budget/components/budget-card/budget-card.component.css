@@ -1,0 +1,73 @@
+.budget-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.date-range {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: normal;
+}
+
+.summary-section {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.summary-row.total {
+  font-weight: bold;
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px dashed #eee;
+}
+
+.income-text { color: #52c41a; }
+.expense-text { color: #ff4d4f; }
+.positive { color: #52c41a; }
+.negative { color: #ff4d4f; }
+
+
+
+.entry-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  margin-bottom: 2px;
+}
+
+.past-budget {
+  opacity: 0.6;
+  background-color: #fafafa;
+}
+
+:host {
+  height: 100%;
+  display: block;
+}
+
+/* Ensure NzCard internal body stretches */
+::ng-deep .ant-card-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.entries-list {
+  flex: 1; /* Grow to fill space */
+  overflow-y: auto;
+  min-height: 0; /* Important for flex child scroll */
+}

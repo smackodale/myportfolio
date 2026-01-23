@@ -38,6 +38,22 @@ export const routes: Routes = [
     path: 'budget',
     component: BudgetComponent,
     canActivate: [MsalGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/budget/components/budget-view/budget-view.component').then(
+            (m) => m.BudgetViewComponent,
+          ),
+      },
+      {
+        path: 'standard',
+        loadComponent: () =>
+          import('./pages/budget/components/standard-entries/standard-entries.component').then(
+            (m) => m.StandardEntriesComponent,
+          ),
+      },
+    ],
   },
   {
     path: 'goodbye',
