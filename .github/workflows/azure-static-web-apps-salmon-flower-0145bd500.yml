@@ -19,10 +19,6 @@ jobs:
         with:
           submodules: true
           lfs: false
-      - name: Use Node.js version 24
-        uses: actions/setup-node@v4
-        with:
-          node-version: '24'
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -48,5 +44,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_SALMON_FLOWER_0145BD500 }}
           action: "close"
+
 
 
