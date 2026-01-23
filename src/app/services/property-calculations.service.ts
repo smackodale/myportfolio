@@ -73,7 +73,16 @@ export class PropertyCalculationsService {
    */
   calculateTotalRepayment(mortgages: Mortgage[]): number {
     if (!mortgages) return 0;
-    return mortgages.reduce((sum, m) => sum + (m.repaymentAmount || 0), 0);
+    return mortgages.reduce((sum, m) => {
+      // Calculate repayment for each mortgage based on its specific details
+      const repayment = this.calculateMortgageRepayment(
+        m.originalAmount || 0,
+        m.outstandingBalance || 0,
+        m.interestRate || 0,
+        m.loanType || '',
+      );
+      return sum + repayment;
+    }, 0);
   }
 
   /**
@@ -104,23 +113,30 @@ export class PropertyCalculationsService {
 
   /**
    * Calculate monthly repayment amount for a single mortgage
-   * Interest Only: (Original Amount * Rate) / 12
-   * Principal & Interest: Standard amortization formula (assumed 30 years)
+   * Interest Only: (Outstanding Balance * Rate) / 12
+   * Principal & Interest: Standard amortization formula (assumed 30 years) based on Original Amount
    */
   calculateMortgageRepayment(
     originalAmount: number,
+    outstandingBalance: number,
     interestRate: number,
     loanType: string,
   ): number {
-    if (!originalAmount || !interestRate) return 0;
+    if (!interestRate) return 0;
 
     const rate = interestRate / 100;
     const monthlyRate = rate / 12;
 
     if (loanType === 'Interest Only') {
-      return (originalAmount * rate) / 12;
+      // Interest Only is typically calculated on the outstanding balance
+      // If outstanding balance is not available, fall back to original amount
+      const principal = outstandingBalance || originalAmount || 0;
+      return (principal * rate) / 12;
     } else {
       // Principal and Interest - Assumed 30 years (360 months)
+      // Standard amortization uses the original loan amount
+      if (!originalAmount) return 0;
+
       const termMonths = 360;
       // Formula: P * [r(1+r)^n] / [(1+r)^n - 1]
       const numerator = monthlyRate * Math.pow(1 + monthlyRate, termMonths);

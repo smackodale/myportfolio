@@ -1,22 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-budget',
-  standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="page-content">
-      <h1>Budget</h1>
-      <p>Monitor your income sources.</p>
-    </div>
-  `,
-  styles: [
-    `
-      .page-content {
-        padding: 20px;
-      }
-    `,
-  ],
+  templateUrl: './budget.component.html',
+  styleUrl: './budget.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BudgetComponent {}

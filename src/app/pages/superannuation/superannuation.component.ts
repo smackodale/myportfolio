@@ -1,18 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-superannuation',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="page-content">
-      <h1>Superannuation</h1>
-      <p>Track your retirement savings.</p>
-    </div>
-  `,
-    styles: [`
-    .page-content { padding: 20px; }
-  `]
+  selector: 'app-superannuation',
+  imports: [CommonModule],
+  templateUrl: './superannuation.component.html',
+  styleUrl: './superannuation.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SuperannuationComponent { }
+export class SuperannuationComponent {}

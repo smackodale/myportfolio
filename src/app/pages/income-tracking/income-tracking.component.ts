@@ -1,18 +1,11 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-income-tracking',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="page-content">
-      <h1>Income Tracking</h1>
-      <p>Monitor your income sources.</p>
-    </div>
-  `,
-    styles: [`
-    .page-content { padding: 20px; }
-  `]
+  selector: 'app-income-tracking',
+  imports: [CommonModule],
+  templateUrl: './income-tracking.component.html',
+  styleUrl: './income-tracking.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IncomeTrackingComponent { }
+export class IncomeTrackingComponent {}

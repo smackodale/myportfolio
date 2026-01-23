@@ -1,0 +1,53 @@
+.summary-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #262626;
+}
+
+nz-card {
+  height: 100%;
+}
+
+.statistic-title {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.statistic-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-item.actual {
+  align-items: flex-start;
+}
+
+.stat-item.planned {
+  align-items: flex-end;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #bfbfbf;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+nz-divider {
+  height: 32px;
+  margin: 0 16px;
+}

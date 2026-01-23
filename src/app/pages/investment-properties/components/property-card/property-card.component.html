@@ -1,0 +1,98 @@
+<nz-card
+  [nzCover]="coverTemplate"
+  [nzActions]="[actionEdit, actionDelete]"
+  [class.planned-property]="property().propertyType === PropertyType.Planned"
+  class="property-card"
+>
+  <nz-card-meta [nzTitle]="titleTemplate" [nzDescription]="property().address"> </nz-card-meta>
+
+  <div class="property-details">
+    <div class="detail-row">
+      <span class="label">Property Value:</span>
+      <span class="value">{{
+        property().propertyValue | currency: 'AUD' : 'symbol-narrow' : '1.0-0'
+      }}</span>
+    </div>
+
+    <div class="detail-row">
+      <span class="label">Total Loan:</span>
+      <span class="value">{{
+        totalOutstanding() | currency: 'AUD' : 'symbol-narrow' : '1.0-0'
+      }}</span>
+    </div>
+
+    <div class="detail-row">
+      <span class="label">Total Repayment:</span>
+      <span class="value"
+        >{{ totalRepayment() | currency: 'AUD' : 'symbol-narrow' : '1.0-0' }}/mo</span
+      >
+    </div>
+
+    @if (property().mortgages.length) {
+      <nz-divider
+        nzText="Mortgages"
+        nzOrientation="left"
+        style="margin: 12px 0 8px"
+      ></nz-divider>
+      @for (mortgage of property().mortgages; track $index) {
+        <div class="mortgage-row">
+          <span class="mortgage-info">
+            <nz-tag
+              [nzColor]="'blue'"
+              style="margin-right: 4px; font-size: 10px; line-height: 18px; height: 20px; padding: 0 4px;"
+              >{{
+                mortgage.loanType === LoanType.InterestOnly ? 'Interest Only' : 'P & I'
+              }}</nz-tag
+            >
+            <span class="rate">@ {{ mortgage.interestRate }}%</span>
+          </span>
+          <span class="mortgage-value">
+            {{ mortgage.outstandingBalance | currency: 'AUD' : 'symbol-narrow' : '1.0-0' }}
+          </span>
+        </div>
+      }
+    } @else {
+      <div class="no-mortgages">
+        <span class="label">No mortgages recorded</span>
+      </div>
+    }
+
+    <div class="detail-row highlight" style="margin-top: 12px;">
+      <span class="label">Equity:</span>
+      <span class="value">{{ equity() | currency: 'AUD' : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    <div class="detail-row highlight">
+      <span class="label">Accessible Equity:</span>
+      <span class="value">{{
+        accessibleEquity() | currency: 'AUD' : 'symbol-narrow' : '1.0-0'
+      }}</span>
+    </div>
+  </div>
+</nz-card>
+
+<ng-template #coverTemplate>
+  @if (property().imageUrl) {
+    <img [src]="property().imageUrl" [alt]="property().name" class="property-image" />
+  } @else {
+    <div class="property-image-placeholder">
+      <span nz-icon nzType="home" nzTheme="outline"></span>
+    </div>
+  }
+</ng-template>
+
+<ng-template #titleTemplate>
+  <div class="title-row">
+    {{ property().name }}
+    <nz-tag [nzColor]="property().propertyType === PropertyType.Actual ? 'blue' : 'default'">
+      {{ property().propertyType }}
+    </nz-tag>
+  </div>
+</ng-template>
+
+<ng-template #actionEdit>
+  <span nz-icon nzType="edit" (click)="onEdit()"></span>
+</ng-template>
+
+<ng-template #actionDelete>
+  <span nz-icon nzType="delete" (click)="onDelete()"></span>
+</ng-template>

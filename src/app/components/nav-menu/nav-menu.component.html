@@ -1,0 +1,64 @@
+<div class="logo-area">
+  <h2>My Portfolio</h2>
+</div>
+@if (userAccount()) {
+  <div class="user-info">
+    <div class="user-avatar">
+      <span nz-icon nzType="user" nzTheme="outline"></span>
+    </div>
+    <div class="user-details">
+      <div class="user-name">{{ userName() }}</div>
+      @if (userRoles() && userRoles().length > 0) {
+        <div class="user-roles">
+          @for (role of userRoles(); track role) {
+            <div class="role-badge">{{ role }}</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}
+<ul nz-menu nzMode="inline" class="sider-menu">
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/dashboard">
+      <span nz-icon nzType="dashboard"></span>
+      <span>Dashboard</span>
+    </a>
+  </li>
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/budget">
+      <span nz-icon nzType="form"></span>
+      <span>Budget</span>
+    </a>
+  </li>
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/investment-properties">
+      <span nz-icon nzType="home"></span>
+      <span>Investment Properties</span>
+    </a>
+  </li>
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/other-investments">
+      <span nz-icon nzType="line-chart"></span>
+      <span>Other Investments</span>
+    </a>
+  </li>
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/superannuation">
+      <span nz-icon nzType="dollar"></span>
+      <span>Superannuation</span>
+    </a>
+  </li>
+  <li nz-menu-item nzMatchRouter>
+    <a routerLink="/income-tracking">
+      <span nz-icon nzType="wallet"></span>
+      <span>Income Tracking</span>
+    </a>
+  </li>
+</ul>
+<div class="logout-section">
+  <button class="logout-button" (click)="logout()">
+    <span nz-icon nzType="logout" nzTheme="outline"></span>
+    <span>Logout</span>
+  </button>
+</div>

@@ -1,35 +1,42 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Store } from '@ngxs/store';
-import { Observable, Subject } from 'rxjs';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { FormsModule } from '@angular/forms';
 import {
-  InvestmentProperty,
-  PropertySummary,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  TemplateRef,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
+import { Store } from '@ngxs/store';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import {
   CreatePropertyDto,
+  InvestmentProperty,
+  PropertyType,
   UpdatePropertyDto,
 } from '../../models/investment-property.model';
-import { InvestmentPropertiesState } from '../../store/investment-properties/investment-properties.state';
 import {
-  LoadProperties,
   AddProperty,
-  UpdateProperty,
   DeleteProperty,
+  LoadProperties,
+  UpdateProperty,
 } from '../../store/investment-properties/investment-properties.actions';
+import { InvestmentPropertiesState } from '../../store/investment-properties/investment-properties.state';
 import { PropertyCardComponent } from './components/property-card/property-card.component';
 import { PropertyFormComponent } from './components/property-form/property-form.component';
 import { PropertySummaryComponent } from './components/property-summary/property-summary.component';
 
 @Component({
   selector: 'app-investment-properties',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -44,237 +51,91 @@ import { PropertySummaryComponent } from './components/property-summary/property
     PropertyFormComponent,
     PropertySummaryComponent,
   ],
-  template: `
-    <div class="page-container">
-      <div class="page-header">
-        <h1>Investment Properties</h1>
-        <button nz-button nzType="primary" (click)="showAddModal()">Add Property</button>
-      </div>
-
-      @if (error$ | async; as error) {
-        <nz-alert nzType="error" [nzMessage]="error" nzCloseable class="error-alert"></nz-alert>
-      }
-
-      <nz-spin [nzSpinning]="loading$ | async" nzTip="Loading...">
-        <!-- Actual Properties Summary -->
-        <app-property-summary
-          title="Actual Properties Summary"
-          [summary]="actualSummary$ | async"
-          [isPlanned]="false"
-        ></app-property-summary>
-
-        <!-- Actual Properties Grid -->
-        <div class="properties-section">
-          <h2>Actual Properties</h2>
-          <div nz-row [nzGutter]="[16, 16]">
-            @for (property of actualProperties$ | async; track property.id) {
-              <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="8">
-                <app-property-card
-                  [property]="property"
-                  (edit)="showEditModal($event)"
-                  (delete)="showDeleteConfirm($event)"
-                ></app-property-card>
-              </div>
-            }
-          </div>
-          @if ((actualProperties$ | async)?.length === 0) {
-            <div class="empty-state">
-              <p>No actual properties added yet. Click "Add Property" to get started.</p>
-            </div>
-          }
-        </div>
-
-        <!-- Planned Properties Summary -->
-        <app-property-summary
-          title="Planned Properties Summary"
-          [summary]="plannedSummary$ | async"
-          [isPlanned]="true"
-        ></app-property-summary>
-
-        <!-- Planned Properties Grid -->
-        <div class="properties-section planned">
-          <h2>Planned Properties</h2>
-          <div nz-row [nzGutter]="[16, 16]">
-            @for (property of plannedProperties$ | async; track property.id) {
-              <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="8">
-                <app-property-card
-                  [property]="property"
-                  (edit)="showEditModal($event)"
-                  (delete)="showDeleteConfirm($event)"
-                ></app-property-card>
-              </div>
-            }
-          </div>
-          @if ((plannedProperties$ | async)?.length === 0) {
-            <div class="empty-state">
-              <p>No planned properties yet.</p>
-            </div>
-          }
-        </div>
-      </nz-spin>
-
-      <!-- Add/Edit Property Modal -->
-      <nz-modal
-        [(nzVisible)]="isModalVisible"
-        [nzTitle]="modalTitle"
-        [nzFooter]="null"
-        (nzOnCancel)="handleModalCancel()"
-        nzWidth="700px"
-        nzCentered
-      >
-        <div *nzModalContent>
-          <app-property-form
-            [property]="selectedProperty"
-            (submit)="handleFormSubmit($event)"
-            (cancel)="handleModalCancel()"
-          ></app-property-form>
-        </div>
-      </nz-modal>
-    </div>
-  `,
-  styles: [
-    `
-      .page-container {
-        padding: 24px;
-      }
-
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-      }
-
-      .page-header h1 {
-        margin: 0;
-        font-size: 24px;
-        font-weight: 600;
-      }
-
-      .error-alert {
-        margin-bottom: 16px;
-      }
-
-      .properties-section {
-        margin-bottom: 32px;
-      }
-
-      .properties-section.planned {
-        margin-top: 24px;
-      }
-
-      .properties-section h2 {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: #262626;
-      }
-
-      .properties-section.planned h2 {
-        color: #595959;
-      }
-
-      .empty-state {
-        text-align: center;
-        padding: 48px 24px;
-        background: #fafafa;
-        border-radius: 4px;
-        color: #8c8c8c;
-      }
-    `,
-  ],
+  templateUrl: './investment-properties.component.html',
+  styleUrl: './investment-properties.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InvestmentPropertiesComponent implements OnInit, OnDestroy {
-  // Use store.select() instead of @Select decorator
-  actualProperties$: Observable<InvestmentProperty[]>;
-  plannedProperties$: Observable<InvestmentProperty[]>;
-  actualSummary$: Observable<PropertySummary>;
-  plannedSummary$: Observable<PropertySummary>;
-  loading$: Observable<boolean>;
-  error$: Observable<string | null>;
+export class InvestmentPropertiesComponent implements OnInit {
+  private readonly store = inject(Store);
+  private readonly modal = inject(NzModalService);
 
-  private destroy$ = new Subject<void>();
+  // States from Store converted to Signals
+  readonly actualProperties = toSignal(
+    this.store.select(InvestmentPropertiesState.actualProperties),
+    { initialValue: [] as InvestmentProperty[] },
+  );
+  readonly plannedProperties = toSignal(
+    this.store.select(InvestmentPropertiesState.plannedProperties),
+    { initialValue: [] as InvestmentProperty[] },
+  );
+  readonly actualSummary = toSignal(this.store.select(InvestmentPropertiesState.actualSummary));
+  readonly plannedSummary = toSignal(this.store.select(InvestmentPropertiesState.plannedSummary));
+  readonly loading = toSignal(this.store.select(InvestmentPropertiesState.isLoading), {
+    initialValue: false,
+  });
+  readonly error = toSignal(this.store.select(InvestmentPropertiesState.getError), {
+    initialValue: null as string | null,
+  });
 
-  isModalVisible = false;
-  modalTitle = 'Add Property';
-  selectedProperty?: InvestmentProperty;
+  // Combined and sorted properties using computed signal
+  readonly allProperties = computed(() => {
+    const actual = this.actualProperties();
+    const planned = this.plannedProperties();
+    return [...actual, ...planned].sort((a, b) => {
+      if (a.propertyType === b.propertyType) return 0;
+      return a.propertyType === PropertyType.Actual ? -1 : 1;
+    });
+  });
 
-  constructor(
-    private store: Store,
-    private modal: NzModalService,
-  ) {
-    // Initialize observables using store.select()
-    this.actualProperties$ = this.store.select(InvestmentPropertiesState.actualProperties);
-    this.plannedProperties$ = this.store.select(InvestmentPropertiesState.plannedProperties);
-    this.actualSummary$ = this.store.select(InvestmentPropertiesState.actualSummary);
-    this.plannedSummary$ = this.store.select(InvestmentPropertiesState.plannedSummary);
-    this.loading$ = this.store.select(InvestmentPropertiesState.isLoading);
-    this.error$ = this.store.select(InvestmentPropertiesState.getError);
-  }
+  // Local component state using signals
+  readonly isModalVisible = signal(false);
+  readonly modalTitle = signal('Add Property');
+  readonly selectedProperty = signal<InvestmentProperty | undefined>(undefined);
+  readonly deletePropertyName = signal('');
 
   ngOnInit(): void {
-    // Load properties on init
     this.store.dispatch(new LoadProperties());
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   showAddModal(): void {
-    this.selectedProperty = undefined;
-    this.modalTitle = 'Add Property';
-    this.isModalVisible = true;
+    this.selectedProperty.set(undefined);
+    this.modalTitle.set('Add Property');
+    this.isModalVisible.set(true);
   }
 
   showEditModal(property: InvestmentProperty): void {
-    this.selectedProperty = property;
-    this.modalTitle = 'Edit Property';
-    this.isModalVisible = true;
+    this.selectedProperty.set(property);
+    this.modalTitle.set('Edit Property');
+    this.isModalVisible.set(true);
   }
 
   handleFormSubmit(formValue: CreatePropertyDto | UpdatePropertyDto): void {
-    if (this.selectedProperty) {
-      // Update existing property
-      this.store.dispatch(
-        new UpdateProperty(this.selectedProperty.id, formValue as UpdatePropertyDto),
-      );
+    const selected = this.selectedProperty();
+    if (selected) {
+      this.store.dispatch(new UpdateProperty(selected.id, formValue as UpdatePropertyDto));
     } else {
-      // Add new property
       this.store.dispatch(new AddProperty(formValue as CreatePropertyDto));
     }
-    this.isModalVisible = false;
+    this.isModalVisible.set(false);
   }
 
   handleModalCancel(): void {
-    this.isModalVisible = false;
-    this.selectedProperty = undefined;
+    this.isModalVisible.set(false);
+    this.selectedProperty.set(undefined);
   }
 
-  showDeleteConfirm(property: InvestmentProperty): void {
-    let confirmName = '';
+  showDeleteConfirm(property: InvestmentProperty, deleteTemplate: TemplateRef<unknown>): void {
+    this.selectedProperty.set(property);
+    this.deletePropertyName.set('');
 
     this.modal.confirm({
       nzTitle: 'Delete Property',
-      nzContent: `
-        <p>Are you sure you want to delete <strong>${property.name}</strong>?</p>
-        <p style="margin-top: 16px; margin-bottom: 8px;">Please type the property name to confirm:</p>
-        <input
-          id="delete-confirm-input"
-          type="text"
-          class="ant-input"
-          placeholder="Enter property name"
-        />
-      `,
+      nzContent: deleteTemplate,
       nzOkText: 'Delete',
       nzOkDanger: true,
       nzCancelText: 'Cancel',
       nzOnOk: () => {
-        const input = document.getElementById('delete-confirm-input') as HTMLInputElement;
-        confirmName = input?.value || '';
-
-        if (confirmName === property.name) {
+        if (this.deletePropertyName() === property.name) {
           this.store.dispatch(new DeleteProperty(property.id));
           return Promise.resolve();
         } else {

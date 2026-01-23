@@ -1,0 +1,116 @@
+<div class="summary-section">
+  <h2>Summary</h2>
+  <div nz-row [nzGutter]="16">
+    <!-- Total Property Value -->
+    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="6">
+      <nz-card>
+        <div class="statistic-title">Total Property Value</div>
+        <div class="statistic-row">
+          <div class="stat-item actual">
+            <div class="stat-label">Actual</div>
+            <div class="stat-value" [style.color]="'#3f8600'">
+              {{
+                (actualSummary()?.totalPropertyValue || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+          <nz-divider nzType="vertical"></nz-divider>
+          <div class="stat-item planned">
+            <div class="stat-label">Planned</div>
+            <div class="stat-value" [style.color]="'#595959'">
+              {{
+                (plannedSummary()?.totalPropertyValue || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Total Financed Amount -->
+    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="6">
+      <nz-card>
+        <div class="statistic-title">Total Financed Amount</div>
+        <div class="statistic-row">
+          <div class="stat-item actual">
+            <div class="stat-label">Actual</div>
+            <div class="stat-value" [style.color]="'#cf1322'">
+              {{
+                (actualSummary()?.totalFinancedAmount || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+          <nz-divider nzType="vertical"></nz-divider>
+          <div class="stat-item planned">
+            <div class="stat-label">Planned</div>
+            <div class="stat-value" [style.color]="'#595959'">
+              {{
+                (plannedSummary()?.totalFinancedAmount || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Total Equity -->
+    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="6">
+      <nz-card>
+        <div class="statistic-title">Total Equity</div>
+        <div class="statistic-row">
+          <div class="stat-item actual">
+            <div class="stat-label">Actual</div>
+            <div class="stat-value" [style.color]="'#1890ff'">
+              {{
+                (actualSummary()?.totalEquity || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+          <nz-divider nzType="vertical"></nz-divider>
+          <div class="stat-item planned">
+            <div class="stat-label">Planned</div>
+            <div class="stat-value" [style.color]="'#595959'">
+              {{
+                (plannedSummary()?.totalEquity || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+
+    <!-- Total Usable Equity -->
+    <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="6">
+      <nz-card>
+        <div class="statistic-title">Total Usable Equity</div>
+        <div class="statistic-row">
+          <div class="stat-item actual">
+            <div class="stat-label">Actual</div>
+            <div class="stat-value" [style.color]="'#722ed1'">
+              {{
+                (actualSummary()?.totalUsableEquity || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+          <nz-divider nzType="vertical"></nz-divider>
+          <div class="stat-item planned">
+            <div class="stat-label">Planned</div>
+            <div class="stat-value" [style.color]="'#595959'">
+              {{
+                (plannedSummary()?.totalUsableEquity || 0
+                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+              }}
+            </div>
+          </div>
+        </div>
+      </nz-card>
+    </div>
+  </div>
+</div>

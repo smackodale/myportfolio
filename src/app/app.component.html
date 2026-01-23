@@ -1,0 +1,14 @@
+<nz-layout class="app-layout">
+  @if (loginDisplay()) {
+    <nz-sider nzCollapsible nzWidth="200px" [nzTrigger]="null">
+      <app-nav-menu></app-nav-menu>
+    </nz-sider>
+  }
+  <nz-layout class="right-layout">
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

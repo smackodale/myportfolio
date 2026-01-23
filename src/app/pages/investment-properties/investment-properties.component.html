@@ -1,0 +1,80 @@
+<div class="page-container">
+  <!-- Fixed Top Section -->
+  <div class="fixed-header">
+    <div class="page-header">
+      <h1>Investment Properties</h1>
+      <button nz-button nzType="primary" (click)="showAddModal()">Add Property</button>
+    </div>
+
+    @if (error()) {
+      <nz-alert nzType="error" [nzMessage]="error()" nzCloseable class="error-alert"></nz-alert>
+    }
+
+    <!-- Combined Summaries -->
+    <div class="summaries-container">
+      <app-property-summary
+        [actualSummary]="actualSummary()"
+        [plannedSummary]="plannedSummary()"
+      ></app-property-summary>
+    </div>
+  </div>
+
+  <!-- Scrollable Content Section -->
+  <div class="scrollable-content">
+    <nz-spin [nzSpinning]="loading()" nzTip="Loading...">
+      <div class="properties-section">
+        <div nz-row [nzGutter]="[16, 16]">
+          @for (property of allProperties(); track property.id) {
+            <div nz-col [nzXs]="24" [nzSm]="24" [nzMd]="12" [nzLg]="8">
+              <app-property-card
+                [property]="property"
+                (edit)="showEditModal($event)"
+                (delete)="showDeleteConfirm($event, deleteTemplate)"
+              ></app-property-card>
+            </div>
+          }
+        </div>
+        @if (allProperties().length === 0) {
+          <div class="empty-state">
+            <p>No properties added yet. Click "Add Property" to get started.</p>
+          </div>
+        }
+      </div>
+    </nz-spin>
+  </div>
+
+  <!-- Add/Edit Property Modal -->
+  <nz-modal
+    [nzVisible]="isModalVisible()"
+    [nzTitle]="modalTitle()"
+    [nzFooter]="null"
+    (nzOnCancel)="handleModalCancel()"
+    nzWidth="700px"
+    nzCentered
+  >
+    <div *nzModalContent>
+      <app-property-form
+        [property]="selectedProperty()"
+        (submit)="handleFormSubmit($event)"
+        (cancel)="handleModalCancel()"
+      ></app-property-form>
+    </div>
+  </nz-modal>
+</div>
+<ng-template #deleteTemplate>
+  <p>
+    Are you sure you want to delete <strong>{{ selectedProperty()?.name }}</strong>?
+  </p>
+  <nz-form-item>
+    <nz-form-label [nzSpan]="24">Please type the property name to confirm:</nz-form-label>
+    <nz-form-control [nzSpan]="24">
+      <input
+        type="text"
+        [ngModel]="deletePropertyName()"
+        (ngModelChange)="deletePropertyName.set($event)"
+        nz-input
+        placeholder="Enter property name"
+      />
+    </nz-form-control>
+  </nz-form-item>
+</ng-template>
