@@ -18,14 +18,18 @@ import {
 import { Store } from '@ngxs/store';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Budget, BudgetEntry, EntryType } from '../../../../models/budget.model';
-import { UpdateBudgetEntry } from '../../../../store/budget/budget.actions';
+import {
+  AddBudgetEntry,
+  DeleteBudgetEntry,
+  UpdateBudgetEntry,
+} from '../../../../store/budget/budget.actions';
 
 @Component({
   selector: 'app-budget-card',
@@ -54,7 +58,7 @@ export class BudgetCardComponent {
   readonly reset = output<string>();
 
   // Editing state
-  readonly editingEntryId = signal<string | null>(null);
+  readonly editingEntryName = signal<string | null>(null);
   readonly editAmount = signal<number>(0);
   readonly isAddingEntry = signal(false);
 
@@ -87,7 +91,7 @@ export class BudgetCardComponent {
   }
 
   startEdit(entry: BudgetEntry) {
-    this.editingEntryId.set(entry.id);
+    this.editingEntryName.set(entry.name);
     this.editAmount.set(entry.amount);
   }
 
@@ -95,14 +99,14 @@ export class BudgetCardComponent {
     const newAmount = this.editAmount();
     if (newAmount > 0 && newAmount !== entry.amount) {
       this.store.dispatch(
-        new UpdateBudgetEntry(this.budget().weekId, entry.id, { amount: newAmount }),
+        new UpdateBudgetEntry(this.budget().weekId, entry.name, { amount: newAmount }),
       );
     }
     this.cancelEdit();
   }
 
   cancelEdit() {
-    this.editingEntryId.set(null);
+    this.editingEntryName.set(null);
     this.editAmount.set(0);
   }
 
@@ -112,27 +116,8 @@ export class BudgetCardComponent {
       return;
     }
 
-    // Remove the entry by updating the budget without it
-    const updatedEntries = this.budget().entries.filter((e) => e.id !== entry.id);
-    const { totalIncome, totalExpenses, weekTotal } = {
-      totalIncome: updatedEntries
-        .filter((e) => e.type === 'Income')
-        .reduce((sum, e) => sum + e.amount, 0),
-      totalExpenses: updatedEntries
-        .filter((e) => e.type === 'Expense')
-        .reduce((sum, e) => sum + e.amount, 0),
-      weekTotal: 0,
-    };
-
     // Create a temporary budget update
-    this.store.dispatch(
-      new UpdateBudgetEntry(this.budget().weekId, entry.id, {
-        amount: 0,
-        name: '',
-        type: entry.type,
-        isStandard: false,
-      }),
-    );
+    this.store.dispatch(new DeleteBudgetEntry(this.budget().weekId, entry.name));
   }
 
   showAddEntryForm() {
@@ -158,7 +143,7 @@ export class BudgetCardComponent {
 
       // Dispatch action to add entry
       this.store.dispatch(
-        new UpdateBudgetEntry(this.budget().weekId, crypto.randomUUID(), {
+        new AddBudgetEntry(this.budget().weekId, {
           name: formValue.name,
           amount: formValue.amount,
           type: formValue.type,

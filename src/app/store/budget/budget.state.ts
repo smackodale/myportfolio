@@ -6,8 +6,10 @@ import { Budget, BudgetEntry, StandardEntry } from '../../models/budget.model';
 import { BudgetApiService } from '../../services/budget-api.service';
 import { BudgetCalculationService } from '../../services/budget-calculation.service';
 import {
+  AddBudgetEntry,
   AddNextBudget,
   AddStandardEntry,
+  DeleteBudgetEntry,
   DeleteStandardEntry,
   LoadBudgets,
   LoadStandardEntries,
@@ -236,23 +238,95 @@ export class BudgetState {
       return throwError(() => new Error('Budget not found'));
     }
 
-    const entryIndex = budget.entries.findIndex((e) => e.id === action.entryId);
+    const entryIndex = budget.entries.findIndex((e) => e.name === action.entryName);
     let updatedEntries: BudgetEntry[];
 
     if (entryIndex === -1) {
-      // Entry doesn't exist - add new entry
-      const newEntry: BudgetEntry = {
-        id: action.entryId,
-        name: action.payload.name || '',
-        amount: action.payload.amount || 0,
-        type: action.payload.type || 'Expense',
-        isStandard: action.payload.isStandard ?? false,
-      };
-      updatedEntries = [...budget.entries, newEntry];
-    } else {
-      // Entry exists - update it
-      updatedEntries = [...budget.entries];
-      updatedEntries[entryIndex] = { ...updatedEntries[entryIndex], ...action.payload };
+      return throwError(() => new Error('Entry not found'));
+    }
+
+    // Entry exists - update it
+    updatedEntries = [...budget.entries];
+    updatedEntries[entryIndex] = { ...updatedEntries[entryIndex], ...action.payload };
+
+    // Recalculate totals
+    const { totalIncome, totalExpenses, weekTotal } =
+      this.calculationService.calculateTotals(updatedEntries);
+
+    // Update via API
+    return this.apiService
+      .updateBudget(action.weekId, {
+        entries: updatedEntries,
+        totalIncome,
+        totalExpenses,
+        weekTotal,
+      })
+      .pipe(
+        tap((updatedBudget) => {
+          const budgets = state.budgets.map((b) =>
+            b.weekId === action.weekId ? updatedBudget : b,
+          );
+          this.calculationService.recalculateRunningSavingsAndPast(budgets);
+          ctx.patchState({ budgets });
+        }),
+      );
+  }
+
+  @Action(AddBudgetEntry)
+  addBudgetEntry(ctx: StateContext<BudgetStateModel>, action: AddBudgetEntry) {
+    const state = ctx.getState();
+    const budget = state.budgets.find((b) => b.weekId === action.weekId);
+
+    if (!budget) {
+      return throwError(() => new Error('Budget not found'));
+    }
+
+    // Check if entry with same name already exists
+    const existingEntry = budget.entries.find((e) => e.name === action.payload.name);
+    if (existingEntry) {
+      return throwError(() => new Error('Entry with this name already exists'));
+    }
+
+    // Add new entry
+    const updatedEntries = [...budget.entries, action.payload];
+
+    // Recalculate totals
+    const { totalIncome, totalExpenses, weekTotal } =
+      this.calculationService.calculateTotals(updatedEntries);
+
+    // Update via API
+    return this.apiService
+      .updateBudget(action.weekId, {
+        entries: updatedEntries,
+        totalIncome,
+        totalExpenses,
+        weekTotal,
+      })
+      .pipe(
+        tap((updatedBudget) => {
+          const budgets = state.budgets.map((b) =>
+            b.weekId === action.weekId ? updatedBudget : b,
+          );
+          this.calculationService.recalculateRunningSavingsAndPast(budgets);
+          ctx.patchState({ budgets });
+        }),
+      );
+  }
+
+  @Action(DeleteBudgetEntry)
+  deleteBudgetEntry(ctx: StateContext<BudgetStateModel>, action: DeleteBudgetEntry) {
+    const state = ctx.getState();
+    const budget = state.budgets.find((b) => b.weekId === action.weekId);
+
+    if (!budget) {
+      return throwError(() => new Error('Budget not found'));
+    }
+
+    // Find and remove entry
+    const updatedEntries = budget.entries.filter((e) => e.name !== action.entryName);
+
+    if (updatedEntries.length === budget.entries.length) {
+      return throwError(() => new Error('Entry not found'));
     }
 
     // Recalculate totals

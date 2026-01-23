@@ -31,7 +31,7 @@ export class UpdateBudgetEntry {
   static readonly type = '[Budget] Update Budget Entry';
   constructor(
     public weekId: string,
-    public entryId: string,
+    public entryName: string,
     public payload: Partial<BudgetEntry>,
   ) {}
 }
@@ -40,7 +40,7 @@ export class AddBudgetEntry {
   static readonly type = '[Budget] Add Budget Entry';
   constructor(
     public weekId: string,
-    public payload: Omit<BudgetEntry, 'id'>,
+    public payload: BudgetEntry,
   ) {}
 }
 
@@ -48,7 +48,7 @@ export class DeleteBudgetEntry {
   static readonly type = '[Budget] Delete Budget Entry';
   constructor(
     public weekId: string,
-    public entryId: string,
+    public entryName: string,
   ) {}
 }
 

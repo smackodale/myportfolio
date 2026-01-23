@@ -18,7 +18,6 @@ export class BudgetCalculationService {
     standardEntries.forEach((std) => {
       if (this.shouldApplyToWeek(std, weekStart, weekEnd)) {
         entries.push({
-          id: crypto.randomUUID(),
           name: std.name,
           amount: std.amount,
           type: std.type,

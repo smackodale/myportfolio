@@ -19,7 +19,6 @@ export interface StandardEntry {
 }
 
 export interface BudgetEntry {
-  id: string;
   name: string;
   amount: number;
   type: EntryType;

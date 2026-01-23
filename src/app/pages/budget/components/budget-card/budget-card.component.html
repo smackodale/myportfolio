@@ -30,18 +30,17 @@
     @if (incomeEntries().length > 0) {
       <div class="entries-category">
         <h4 class="income-text">Income</h4>
-        @for (entry of incomeEntries(); track entry.id) {
+        @for (entry of incomeEntries(); track entry.name) {
           <div class="entry-row">
-            <span class="entry-name">{{ entry.name }}</span>
+            <span class="entry-name income-text">{{ entry.name }}</span>
             <div class="entry-amount">
-              @if (editingEntryId() === entry.id) {
+              @if (editingEntryName() === entry.name) {
                 <div class="edit-controls">
                   <nz-input-number
                     [(ngModel)]="editAmount"
                     [nzMin]="0.01"
                     [nzStep]="1"
                     [nzPrecision]="2"
-                    style="width: 120px"
                   ></nz-input-number>
                   <button nz-button nzType="primary" nzSize="small" (click)="saveEdit(entry)">
                     <span nz-icon nzType="check"></span>
@@ -51,16 +50,26 @@
                   </button>
                 </div>
               } @else {
-                <span>{{ entry.amount | currency }}</span>
-                @if (entry.isStandard) {
+                <span class="income-text">{{ entry.amount | currency }}</span>
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="startEdit(entry)"
+                  title="Edit amount"
+                >
+                  <span nz-icon nzType="edit"></span>
+                </button>
+                @if (!entry.isStandard) {
                   <button
                     nz-button
                     nzType="text"
                     nzSize="small"
-                    (click)="startEdit(entry)"
-                    title="Edit amount"
+                    nzDanger
+                    (click)="deleteEntry(entry)"
+                    title="Delete entry"
                   >
-                    <span nz-icon nzType="edit"></span>
+                    <span nz-icon nzType="delete"></span>
                   </button>
                 }
               }
@@ -74,18 +83,17 @@
     @if (expenseEntries().length > 0) {
       <div class="entries-category">
         <h4 class="expense-text">Expenses</h4>
-        @for (entry of expenseEntries(); track entry.id) {
+        @for (entry of expenseEntries(); track entry.name) {
           <div class="entry-row">
-            <span class="entry-name">{{ entry.name }}</span>
+            <span class="entry-name expense-text">{{ entry.name }}</span>
             <div class="entry-amount">
-              @if (editingEntryId() === entry.id) {
+              @if (editingEntryName() === entry.name) {
                 <div class="edit-controls">
                   <nz-input-number
                     [(ngModel)]="editAmount"
                     [nzMin]="0.01"
                     [nzStep]="1"
                     [nzPrecision]="2"
-                    style="width: 120px"
                   ></nz-input-number>
                   <button nz-button nzType="primary" nzSize="small" (click)="saveEdit(entry)">
                     <span nz-icon nzType="check"></span>
@@ -95,16 +103,26 @@
                   </button>
                 </div>
               } @else {
-                <span>{{ entry.amount | currency }}</span>
-                @if (entry.isStandard) {
+                <span class="expense-text">{{ entry.amount | currency }}</span>
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="startEdit(entry)"
+                  title="Edit amount"
+                >
+                  <span nz-icon nzType="edit"></span>
+                </button>
+                @if (!entry.isStandard) {
                   <button
                     nz-button
                     nzType="text"
                     nzSize="small"
-                    (click)="startEdit(entry)"
-                    title="Edit amount"
+                    nzDanger
+                    (click)="deleteEntry(entry)"
+                    title="Delete entry"
                   >
-                    <span nz-icon nzType="edit"></span>
+                    <span nz-icon nzType="delete"></span>
                   </button>
                 }
               }
