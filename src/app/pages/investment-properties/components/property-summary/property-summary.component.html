@@ -1,5 +1,4 @@
 <div class="summary-section">
-  <h2>Summary</h2>
   <div nz-row [nzGutter]="16">
     <!-- Total Property Value -->
     <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="6">
@@ -66,8 +65,8 @@
             <div class="stat-label">Actual</div>
             <div class="stat-value" [style.color]="'#1890ff'">
               {{
-                (actualSummary()?.totalEquity || 0
-                  | currency: 'AUD' : 'symbol-narrow' : '1.0-0') || '$0'
+                (actualSummary()?.totalEquity || 0 | currency: 'AUD' : 'symbol-narrow' : '1.0-0') ||
+                  '$0'
               }}
             </div>
           </div>

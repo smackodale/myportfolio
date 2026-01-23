@@ -14,7 +14,7 @@
 
 .fixed-header {
   flex: 0 0 auto;
-  padding: 24px 24px 0 24px;
+  padding: 12px 24px 8px 24px;
   background: #fff;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -24,12 +24,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 .page-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .summaries-container {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 
 .scrollable-content {

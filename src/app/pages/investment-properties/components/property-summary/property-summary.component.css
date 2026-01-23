@@ -1,8 +1,5 @@
-.summary-section h2 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: #262626;
+:host ::ng-deep .ant-card-body {
+  padding: 12px;
 }
 
 nz-card {
@@ -12,7 +9,7 @@ nz-card {
 .statistic-title {
   color: #8c8c8c;
   font-size: 14px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .statistic-row {
@@ -48,6 +45,6 @@ nz-card {
 }
 
 nz-divider {
-  height: 32px;
-  margin: 0 16px;
+  height: 24px;
+  margin: 0 12px;
 }
