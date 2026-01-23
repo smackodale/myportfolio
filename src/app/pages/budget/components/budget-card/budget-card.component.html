@@ -25,6 +25,66 @@
     </div>
   </div>
 
+  <!-- Static Add Entry Section -->
+  <div class="add-section">
+    @if (!isAddingEntry()) {
+      <button
+        nz-button
+        nzType="dashed"
+        nzSize="small"
+        class="add-entry-button"
+        (click)="showAddEntryForm()"
+      >
+        <span nz-icon nzType="plus"></span>
+        <span>Add Entry</span>
+      </button>
+    }
+
+    <!-- Add Entry Form -->
+    @if (isAddingEntry()) {
+      <div class="add-entry-form">
+        <form [formGroup]="newEntryForm" (ngSubmit)="addEntry()">
+          <nz-form-item>
+            <nz-form-label nzRequired>Name</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter a name">
+              <input nz-input formControlName="name" placeholder="Entry name" />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Amount</nz-form-label>
+            <nz-form-control nzErrorTip="Please enter an amount">
+              <nz-input-number
+                formControlName="amount"
+                [nzMin]="0.01"
+                [nzStep]="1"
+                [nzPrecision]="2"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>Type</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="type">
+                @for (type of entryTypes; track type) {
+                  <nz-option [nzValue]="type" [nzLabel]="type"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <div style="display: flex; gap: 8px; justify-content: flex-end">
+            <button nz-button nzType="default" type="button" (click)="cancelAddEntry()">
+              Cancel
+            </button>
+            <button nz-button nzType="primary" type="submit">Add</button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+
   <div class="entries-section">
     <!-- Income Section -->
     @if (incomeEntries().length > 0) {
@@ -70,6 +130,17 @@
                     title="Delete entry"
                   >
                     <span nz-icon nzType="delete"></span>
+                  </button>
+                } @else {
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzSize="small"
+                    class="standard-lock-btn"
+                    disabled
+                    title="Standard entry (cannot be deleted)"
+                  >
+                    <span nz-icon nzType="lock"></span>
                   </button>
                 }
               }
@@ -124,67 +195,23 @@
                   >
                     <span nz-icon nzType="delete"></span>
                   </button>
+                } @else {
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzSize="small"
+                    class="standard-lock-btn"
+                    disabled
+                    title="Standard entry (cannot be deleted)"
+                  >
+                    <span nz-icon nzType="lock"></span>
+                  </button>
                 }
               }
             </div>
           </div>
         }
       </div>
-    }
-  </div>
-
-  <!-- Add Entry Form -->
-  @if (isAddingEntry()) {
-    <div class="add-entry-form">
-      <form [formGroup]="newEntryForm" (ngSubmit)="addEntry()">
-        <nz-form-item>
-          <nz-form-label nzRequired>Name</nz-form-label>
-          <nz-form-control nzErrorTip="Please enter a name">
-            <input nz-input formControlName="name" placeholder="Entry name" />
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label nzRequired>Amount</nz-form-label>
-          <nz-form-control nzErrorTip="Please enter an amount">
-            <nz-input-number
-              formControlName="amount"
-              [nzMin]="0.01"
-              [nzStep]="1"
-              [nzPrecision]="2"
-              style="width: 100%"
-            ></nz-input-number>
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label nzRequired>Type</nz-form-label>
-          <nz-form-control>
-            <nz-select formControlName="type">
-              @for (type of entryTypes; track type) {
-                <nz-option [nzValue]="type" [nzLabel]="type"></nz-option>
-              }
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-
-        <div style="display: flex; gap: 8px; justify-content: flex-end">
-          <button nz-button nzType="default" type="button" (click)="cancelAddEntry()">
-            Cancel
-          </button>
-          <button nz-button nzType="primary" type="submit">Add</button>
-        </div>
-      </form>
-    </div>
-  }
-
-  <!-- Actions Section -->
-  <div class="actions-section">
-    @if (!isAddingEntry()) {
-      <button nz-button nzType="dashed" nzSize="small" (click)="showAddEntryForm()">
-        <span nz-icon nzType="plus"></span>
-        Add Entry
-      </button>
     }
   </div>
 </nz-card>

@@ -2,7 +2,7 @@
   <!-- Fixed Top Section -->
   <div class="fixed-header">
     <div class="page-header">
-      <h1>Investment Properties</h1>
+      <h1>Properties</h1>
       <button nz-button nzType="primary" (click)="showAddModal()">Add Property</button>
     </div>
 
@@ -63,7 +63,8 @@
 </div>
 <ng-template #deleteTemplate>
   <p>
-    Are you sure you want to delete <strong>{{ selectedProperty()?.name }}</strong>?
+    Are you sure you want to delete <strong>{{ selectedProperty()?.name }}</strong
+    >?
   </p>
   <nz-form-item>
     <nz-form-label [nzSpan]="24">Please type the property name to confirm:</nz-form-label>

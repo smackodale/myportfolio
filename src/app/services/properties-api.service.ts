@@ -1,22 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
-import {
-  CreatePropertyDto,
-  InvestmentProperty,
-  UpdatePropertyDto,
-} from '../models/investment-property.model';
+import { CreatePropertyDto, Property, UpdatePropertyDto } from '../models/property.model';
 
 /**
- * MOCK API Service for Investment Properties
+ * MOCK API Service for Properties
  * Uses localStorage for persistence for testing purposes
  */
 @Injectable({
   providedIn: 'root',
 })
-export class InvestmentPropertiesApiService {
-  private readonly STORAGE_KEY = 'mock_investment_properties';
-  private properties: InvestmentProperty[] = [];
+export class PropertiesApiService {
+  private readonly STORAGE_KEY = 'mock_properties';
+  private properties: Property[] = [];
 
   constructor() {
     this.loadFromStorage();
@@ -39,16 +35,16 @@ export class InvestmentPropertiesApiService {
   }
 
   /**
-   * Get all investment properties
+   * Get all properties
    */
-  getProperties(): Observable<InvestmentProperty[]> {
+  getProperties(): Observable<Property[]> {
     return of([...this.properties]).pipe(delay(500)); // Simulate network delay
   }
 
   /**
    * Get a single property by ID
    */
-  getProperty(id: string): Observable<InvestmentProperty> {
+  getProperty(id: string): Observable<Property> {
     const property = this.properties.find((p) => p.id === id);
     if (property) {
       return of({ ...property }).pipe(delay(300));
@@ -57,10 +53,10 @@ export class InvestmentPropertiesApiService {
   }
 
   /**
-   * Create a new investment property
+   * Create a new property
    */
-  createProperty(dto: CreatePropertyDto): Observable<InvestmentProperty> {
-    const newProperty: InvestmentProperty = {
+  createProperty(dto: CreatePropertyDto): Observable<Property> {
+    const newProperty: Property = {
       ...dto,
       id: this.generateId(),
     };
@@ -74,7 +70,7 @@ export class InvestmentPropertiesApiService {
   /**
    * Update an existing property
    */
-  updateProperty(id: string, dto: UpdatePropertyDto): Observable<InvestmentProperty> {
+  updateProperty(id: string, dto: UpdatePropertyDto): Observable<Property> {
     const index = this.properties.findIndex((p) => p.id === id);
 
     if (index !== -1) {

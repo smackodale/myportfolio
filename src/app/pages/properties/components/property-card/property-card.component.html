@@ -29,20 +29,20 @@
     </div>
 
     @if (property().mortgages.length) {
-      <nz-divider
-        nzText="Mortgages"
-        nzOrientation="left"
-        style="margin: 12px 0 8px"
-      ></nz-divider>
+      <nz-divider nzText="Mortgages" nzOrientation="left" style="margin: 12px 0 8px"></nz-divider>
       @for (mortgage of property().mortgages; track $index) {
         <div class="mortgage-row">
           <span class="mortgage-info">
             <nz-tag
               [nzColor]="'blue'"
-              style="margin-right: 4px; font-size: 10px; line-height: 18px; height: 20px; padding: 0 4px;"
-              >{{
-                mortgage.loanType === LoanType.InterestOnly ? 'Interest Only' : 'P & I'
-              }}</nz-tag
+              style="
+                margin-right: 4px;
+                font-size: 10px;
+                line-height: 18px;
+                height: 20px;
+                padding: 0 4px;
+              "
+              >{{ mortgage.loanType === LoanType.InterestOnly ? 'Interest Only' : 'P & I' }}</nz-tag
             >
             <span class="rate">@ {{ mortgage.interestRate }}%</span>
           </span>
@@ -57,7 +57,7 @@
       </div>
     }
 
-    <div class="detail-row highlight" style="margin-top: 12px;">
+    <div class="detail-row highlight" style="margin-top: 12px">
       <span class="label">Equity:</span>
       <span class="value">{{ equity() | currency: 'AUD' : 'symbol-narrow' : '1.0-0' }}</span>
     </div>

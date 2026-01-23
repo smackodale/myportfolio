@@ -20,23 +20,23 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import {
   CreatePropertyDto,
-  InvestmentProperty,
+  Property,
   PropertyType,
   UpdatePropertyDto,
-} from '../../models/investment-property.model';
+} from '../../models/property.model';
 import {
   AddProperty,
   DeleteProperty,
   LoadProperties,
   UpdateProperty,
-} from '../../store/investment-properties/investment-properties.actions';
-import { InvestmentPropertiesState } from '../../store/investment-properties/investment-properties.state';
+} from '../../store/properties/properties.actions';
+import { PropertiesState } from '../../store/properties/properties.state';
 import { PropertyCardComponent } from './components/property-card/property-card.component';
 import { PropertyFormComponent } from './components/property-form/property-form.component';
 import { PropertySummaryComponent } from './components/property-summary/property-summary.component';
 
 @Component({
-  selector: 'app-investment-properties',
+  selector: 'app-properties',
   imports: [
     CommonModule,
     FormsModule,
@@ -51,29 +51,27 @@ import { PropertySummaryComponent } from './components/property-summary/property
     PropertyFormComponent,
     PropertySummaryComponent,
   ],
-  templateUrl: './investment-properties.component.html',
-  styleUrl: './investment-properties.component.css',
+  templateUrl: './properties.component.html',
+  styleUrl: './properties.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InvestmentPropertiesComponent implements OnInit {
+export class PropertiesComponent implements OnInit {
   private readonly store = inject(Store);
   private readonly modal = inject(NzModalService);
 
   // States from Store converted to Signals
-  readonly actualProperties = toSignal(
-    this.store.select(InvestmentPropertiesState.actualProperties),
-    { initialValue: [] as InvestmentProperty[] },
-  );
-  readonly plannedProperties = toSignal(
-    this.store.select(InvestmentPropertiesState.plannedProperties),
-    { initialValue: [] as InvestmentProperty[] },
-  );
-  readonly actualSummary = toSignal(this.store.select(InvestmentPropertiesState.actualSummary));
-  readonly plannedSummary = toSignal(this.store.select(InvestmentPropertiesState.plannedSummary));
-  readonly loading = toSignal(this.store.select(InvestmentPropertiesState.isLoading), {
+  readonly actualProperties = toSignal(this.store.select(PropertiesState.actualProperties), {
+    initialValue: [] as Property[],
+  });
+  readonly plannedProperties = toSignal(this.store.select(PropertiesState.plannedProperties), {
+    initialValue: [] as Property[],
+  });
+  readonly actualSummary = toSignal(this.store.select(PropertiesState.actualSummary));
+  readonly plannedSummary = toSignal(this.store.select(PropertiesState.plannedSummary));
+  readonly loading = toSignal(this.store.select(PropertiesState.isLoading), {
     initialValue: false,
   });
-  readonly error = toSignal(this.store.select(InvestmentPropertiesState.getError), {
+  readonly error = toSignal(this.store.select(PropertiesState.getError), {
     initialValue: null as string | null,
   });
 
@@ -90,7 +88,7 @@ export class InvestmentPropertiesComponent implements OnInit {
   // Local component state using signals
   readonly isModalVisible = signal(false);
   readonly modalTitle = signal('Add Property');
-  readonly selectedProperty = signal<InvestmentProperty | undefined>(undefined);
+  readonly selectedProperty = signal<Property | undefined>(undefined);
   readonly deletePropertyName = signal('');
 
   ngOnInit(): void {
@@ -103,7 +101,7 @@ export class InvestmentPropertiesComponent implements OnInit {
     this.isModalVisible.set(true);
   }
 
-  showEditModal(property: InvestmentProperty): void {
+  showEditModal(property: Property): void {
     this.selectedProperty.set(property);
     this.modalTitle.set('Edit Property');
     this.isModalVisible.set(true);
@@ -124,7 +122,7 @@ export class InvestmentPropertiesComponent implements OnInit {
     this.selectedProperty.set(undefined);
   }
 
-  showDeleteConfirm(property: InvestmentProperty, deleteTemplate: TemplateRef<unknown>): void {
+  showDeleteConfirm(property: Property, deleteTemplate: TemplateRef<unknown>): void {
     this.selectedProperty.set(property);
     this.deletePropertyName.set('');
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { InvestmentProperty, Mortgage, PropertySummary } from '../models/investment-property.model';
+import { Property, Mortgage, PropertySummary } from '../models/property.model';
 
 /**
  * Service for property-related calculations
@@ -13,11 +13,8 @@ export class PropertyCalculationsService {
    * Equity = Property Value - Sum(Mortgage Outstanding Balances)
    */
   calculateEquity(propertyValue: number, totalOutstandingBalance: number): number;
-  calculateEquity(property: InvestmentProperty): number;
-  calculateEquity(
-    propertyOrValue: InvestmentProperty | number,
-    totalOutstandingBalance?: number,
-  ): number {
+  calculateEquity(property: Property): number;
+  calculateEquity(propertyOrValue: Property | number, totalOutstandingBalance?: number): number {
     if (typeof propertyOrValue === 'number') {
       return propertyOrValue - (totalOutstandingBalance || 0);
     }
@@ -31,9 +28,9 @@ export class PropertyCalculationsService {
    * Returns 0 if result is negative (no accessible equity)
    */
   calculateAccessibleEquity(propertyValue: number, totalOutstandingBalance: number): number;
-  calculateAccessibleEquity(property: InvestmentProperty): number;
+  calculateAccessibleEquity(property: Property): number;
   calculateAccessibleEquity(
-    propertyOrValue: InvestmentProperty | number,
+    propertyOrValue: Property | number,
     totalOutstandingBalance?: number,
   ): number {
     let value: number;
@@ -88,7 +85,7 @@ export class PropertyCalculationsService {
   /**
    * Calculate summary statistics for a set of properties
    */
-  calculateSummary(properties: InvestmentProperty[]): PropertySummary {
+  calculateSummary(properties: Property[]): PropertySummary {
     return properties.reduce(
       (summary, property) => {
         const equity = this.calculateEquity(property);

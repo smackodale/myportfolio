@@ -6,12 +6,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
-import {
-  InvestmentProperty,
-  LoanType,
-  PropertyType,
-} from '../../../../models/investment-property.model';
 import { PropertyCalculationsService } from '../../../../services/property-calculations.service';
+import { Property, PropertyType, LoanType } from '../../../../models/property.model';
 
 @Component({
   selector: 'app-property-card',
@@ -31,9 +27,9 @@ import { PropertyCalculationsService } from '../../../../services/property-calcu
 export class PropertyCardComponent {
   private readonly calculations = inject(PropertyCalculationsService);
 
-  readonly property = input.required<InvestmentProperty>();
-  readonly edit = output<InvestmentProperty>();
-  readonly delete = output<InvestmentProperty>();
+  readonly property = input.required<Property>();
+  readonly edit = output<Property>();
+  readonly delete = output<Property>();
 
   readonly PropertyType = PropertyType;
   readonly LoanType = LoanType;

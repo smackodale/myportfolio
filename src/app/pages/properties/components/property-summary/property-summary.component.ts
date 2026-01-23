@@ -4,7 +4,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { PropertySummary } from '../../../../models/investment-property.model';
+import { PropertySummary } from '../../../../models/property.model';
 
 @Component({
   selector: 'app-property-summary',

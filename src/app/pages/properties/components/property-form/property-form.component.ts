@@ -21,12 +21,12 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import {
   CreatePropertyDto,
-  InvestmentProperty,
+  Property,
   LoanType,
   Mortgage,
   PropertyType,
   UpdatePropertyDto,
-} from '../../../../models/investment-property.model';
+} from '../../../../models/property.model';
 import { PropertyCalculationsService } from '../../../../services/property-calculations.service';
 
 @Component({
@@ -53,7 +53,7 @@ export class PropertyFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly calculations = inject(PropertyCalculationsService);
 
-  readonly property = input<InvestmentProperty | undefined>();
+  readonly property = input<Property | undefined>();
   readonly formSubmit = output<CreatePropertyDto | UpdatePropertyDto>({ alias: 'submit' });
   readonly formCancel = output<void>({ alias: 'cancel' });
 
@@ -90,7 +90,7 @@ export class PropertyFormComponent implements OnInit {
     return this.propertyForm.get('mortgages') as FormArray;
   }
 
-  private initForm(property?: InvestmentProperty | null): void {
+  private initForm(property?: Property | null): void {
     this.propertyForm = this.fb.group({
       name: [property?.name || '', Validators.required],
       imageUrl: [property?.imageUrl || ''],

@@ -1,5 +1,5 @@
 /**
- * Investment Property Models and Types
+ * Property Models and Types
  */
 
 /**
@@ -30,9 +30,9 @@ export interface Mortgage {
 }
 
 /**
- * Investment Property entity
+ * Property entity
  */
-export interface InvestmentProperty {
+export interface Property {
   id: string;
   name: string;
   imageUrl?: string;

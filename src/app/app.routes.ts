@@ -4,7 +4,7 @@ import { BudgetComponent } from './pages/budget/budget.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { GoodbyeComponent } from './pages/goodbye/goodbye.component';
 import { IncomeTrackingComponent } from './pages/income-tracking/income-tracking.component';
-import { InvestmentPropertiesComponent } from './pages/investment-properties/investment-properties.component';
+import { PropertiesComponent } from './pages/properties/properties.component';
 import { OtherInvestmentsComponent } from './pages/other-investments/other-investments.component';
 import { SuperannuationComponent } from './pages/superannuation/superannuation.component';
 
@@ -15,8 +15,8 @@ export const routes: Routes = [
     canActivate: [MsalGuard],
   },
   {
-    path: 'investment-properties',
-    component: InvestmentPropertiesComponent,
+    path: 'properties',
+    component: PropertiesComponent,
     canActivate: [MsalGuard],
   },
   {
@@ -58,6 +58,7 @@ export const routes: Routes = [
   {
     path: 'goodbye',
     component: GoodbyeComponent,
+    canActivate: [MsalGuard],
   },
   {
     path: '**',

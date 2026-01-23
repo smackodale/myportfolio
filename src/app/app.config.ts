@@ -31,7 +31,7 @@ import { en_AU, NZ_I18N } from 'ng-zorro-antd/i18n';
 import { provideStore } from '@ngxs/store';
 import { withNgxsReduxDevtoolsPlugin } from '@ngxs/devtools-plugin';
 import { withNgxsLoggerPlugin } from '@ngxs/logger-plugin';
-import { InvestmentPropertiesState } from './store/investment-properties/investment-properties.state';
+import { PropertiesState } from './store/properties/properties.state';
 import { BudgetState } from './store/budget/budget.state';
 
 registerLocaleData(en);
@@ -74,7 +74,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
     // NgXs State Management
     provideStore(
-      [InvestmentPropertiesState, BudgetState],
+      [PropertiesState, BudgetState],
       withNgxsReduxDevtoolsPlugin(),
       withNgxsLoggerPlugin(),
     ),

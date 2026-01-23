@@ -1,13 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import {
-  InvestmentProperty,
-  PropertySummary,
-  PropertyType,
-} from '../../models/investment-property.model';
-import { InvestmentPropertiesApiService } from '../../services/investment-properties-api.service';
+import { Property, PropertySummary, PropertyType } from '../../models/property.model';
+import { PropertiesApiService } from '../../services/properties-api.service';
 import { PropertyCalculationsService } from '../../services/property-calculations.service';
 import {
   AddProperty,
@@ -22,22 +18,22 @@ import {
   UpdateProperty,
   UpdatePropertyFailure,
   UpdatePropertySuccess,
-} from './investment-properties.actions';
+} from './properties.actions';
 
 /**
- * State model for investment properties
+ * State model for properties
  */
-export interface InvestmentPropertiesStateModel {
-  properties: InvestmentProperty[];
+export interface PropertiesStateModel {
+  properties: Property[];
   loading: boolean;
   error: string | null;
 }
 
 /**
- * NgXs State for managing investment properties
+ * NgXs State for managing properties
  */
-@State<InvestmentPropertiesStateModel>({
-  name: 'investmentProperties',
+@State<PropertiesStateModel>({
+  name: 'properties',
   defaults: {
     properties: [],
     loading: false,
@@ -45,10 +41,10 @@ export interface InvestmentPropertiesStateModel {
   },
 })
 @Injectable()
-export class InvestmentPropertiesState {
+export class PropertiesState {
   private static calculationsService = new PropertyCalculationsService();
 
-  constructor(private apiService: InvestmentPropertiesApiService) {}
+  constructor(private apiService: PropertiesApiService) {}
 
   // ========== SELECTORS ==========
 
@@ -56,7 +52,7 @@ export class InvestmentPropertiesState {
    * Get all properties
    */
   @Selector()
-  static getProperties(state: InvestmentPropertiesStateModel): InvestmentProperty[] {
+  static getProperties(state: PropertiesStateModel): Property[] {
     return state.properties.map((property) => {
       const mortgages = property.mortgages || [];
       return {
@@ -74,40 +70,40 @@ export class InvestmentPropertiesState {
   /**
    * Get only actual properties
    */
-  @Selector([InvestmentPropertiesState.getProperties])
-  static actualProperties(properties: InvestmentProperty[]): InvestmentProperty[] {
+  @Selector([PropertiesState.getProperties])
+  static actualProperties(properties: Property[]): Property[] {
     return properties.filter((p) => p.propertyType === PropertyType.Actual);
   }
 
   /**
    * Get only planned properties
    */
-  @Selector([InvestmentPropertiesState.getProperties])
-  static plannedProperties(properties: InvestmentProperty[]): InvestmentProperty[] {
+  @Selector([PropertiesState.getProperties])
+  static plannedProperties(properties: Property[]): Property[] {
     return properties.filter((p) => p.propertyType === PropertyType.Planned);
   }
 
   /**
    * Get summary for actual properties
    */
-  @Selector([InvestmentPropertiesState.actualProperties])
-  static actualSummary(properties: InvestmentProperty[]): PropertySummary {
+  @Selector([PropertiesState.actualProperties])
+  static actualSummary(properties: Property[]): PropertySummary {
     return this.calculationsService.calculateSummary(properties);
   }
 
   /**
    * Get summary for planned properties
    */
-  @Selector([InvestmentPropertiesState.plannedProperties])
-  static plannedSummary(properties: InvestmentProperty[]): PropertySummary {
+  @Selector([PropertiesState.plannedProperties])
+  static plannedSummary(properties: Property[]): PropertySummary {
     return this.calculationsService.calculateSummary(properties);
   }
 
   /**
    * Get property by ID
    */
-  @Selector([InvestmentPropertiesState.getProperties])
-  static getPropertyById(properties: InvestmentProperty[]) {
+  @Selector([PropertiesState.getProperties])
+  static getPropertyById(properties: Property[]) {
     return (id: string) => properties.find((p) => p.id === id);
   }
 
@@ -115,7 +111,7 @@ export class InvestmentPropertiesState {
    * Get loading state
    */
   @Selector()
-  static isLoading(state: InvestmentPropertiesStateModel): boolean {
+  static isLoading(state: PropertiesStateModel): boolean {
     return state.loading;
   }
 
@@ -123,7 +119,7 @@ export class InvestmentPropertiesState {
    * Get error state
    */
   @Selector()
-  static getError(state: InvestmentPropertiesStateModel): string | null {
+  static getError(state: PropertiesStateModel): string | null {
     return state.error;
   }
 
@@ -133,7 +129,7 @@ export class InvestmentPropertiesState {
    * Load all properties
    */
   @Action(LoadProperties)
-  loadProperties(ctx: StateContext<InvestmentPropertiesStateModel>) {
+  loadProperties(ctx: StateContext<PropertiesStateModel>) {
     ctx.patchState({ loading: true, error: null });
 
     return this.apiService.getProperties().pipe(
@@ -146,10 +142,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(LoadPropertiesSuccess)
-  loadPropertiesSuccess(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: LoadPropertiesSuccess,
-  ) {
+  loadPropertiesSuccess(ctx: StateContext<PropertiesStateModel>, action: LoadPropertiesSuccess) {
     ctx.patchState({
       properties: action.properties,
       loading: false,
@@ -158,10 +151,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(LoadPropertiesFailure)
-  loadPropertiesFailure(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: LoadPropertiesFailure,
-  ) {
+  loadPropertiesFailure(ctx: StateContext<PropertiesStateModel>, action: LoadPropertiesFailure) {
     ctx.patchState({
       loading: false,
       error: action.error,
@@ -172,7 +162,7 @@ export class InvestmentPropertiesState {
    * Add a new property
    */
   @Action(AddProperty)
-  addProperty(ctx: StateContext<InvestmentPropertiesStateModel>, action: AddProperty) {
+  addProperty(ctx: StateContext<PropertiesStateModel>, action: AddProperty) {
     ctx.patchState({ loading: true, error: null });
 
     return this.apiService.createProperty(action.property).pipe(
@@ -185,10 +175,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(AddPropertySuccess)
-  addPropertySuccess(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: AddPropertySuccess,
-  ) {
+  addPropertySuccess(ctx: StateContext<PropertiesStateModel>, action: AddPropertySuccess) {
     const state = ctx.getState();
     ctx.patchState({
       properties: [...state.properties, action.property],
@@ -198,10 +185,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(AddPropertyFailure)
-  addPropertyFailure(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: AddPropertyFailure,
-  ) {
+  addPropertyFailure(ctx: StateContext<PropertiesStateModel>, action: AddPropertyFailure) {
     ctx.patchState({
       loading: false,
       error: action.error,
@@ -212,7 +196,7 @@ export class InvestmentPropertiesState {
    * Update an existing property
    */
   @Action(UpdateProperty)
-  updateProperty(ctx: StateContext<InvestmentPropertiesStateModel>, action: UpdateProperty) {
+  updateProperty(ctx: StateContext<PropertiesStateModel>, action: UpdateProperty) {
     ctx.patchState({ loading: true, error: null });
 
     return this.apiService.updateProperty(action.id, action.property).pipe(
@@ -225,10 +209,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(UpdatePropertySuccess)
-  updatePropertySuccess(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: UpdatePropertySuccess,
-  ) {
+  updatePropertySuccess(ctx: StateContext<PropertiesStateModel>, action: UpdatePropertySuccess) {
     const state = ctx.getState();
     const properties = state.properties.map((p) =>
       p.id === action.property.id ? action.property : p,
@@ -241,10 +222,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(UpdatePropertyFailure)
-  updatePropertyFailure(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: UpdatePropertyFailure,
-  ) {
+  updatePropertyFailure(ctx: StateContext<PropertiesStateModel>, action: UpdatePropertyFailure) {
     ctx.patchState({
       loading: false,
       error: action.error,
@@ -255,7 +233,7 @@ export class InvestmentPropertiesState {
    * Delete a property
    */
   @Action(DeleteProperty)
-  deleteProperty(ctx: StateContext<InvestmentPropertiesStateModel>, action: DeleteProperty) {
+  deleteProperty(ctx: StateContext<PropertiesStateModel>, action: DeleteProperty) {
     ctx.patchState({ loading: true, error: null });
 
     return this.apiService.deleteProperty(action.id).pipe(
@@ -268,10 +246,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(DeletePropertySuccess)
-  deletePropertySuccess(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: DeletePropertySuccess,
-  ) {
+  deletePropertySuccess(ctx: StateContext<PropertiesStateModel>, action: DeletePropertySuccess) {
     const state = ctx.getState();
     const properties = state.properties.filter((p) => p.id !== action.id);
     ctx.patchState({
@@ -282,10 +257,7 @@ export class InvestmentPropertiesState {
   }
 
   @Action(DeletePropertyFailure)
-  deletePropertyFailure(
-    ctx: StateContext<InvestmentPropertiesStateModel>,
-    action: DeletePropertyFailure,
-  ) {
+  deletePropertyFailure(ctx: StateContext<PropertiesStateModel>, action: DeletePropertyFailure) {
     ctx.patchState({
       loading: false,
       error: action.error,

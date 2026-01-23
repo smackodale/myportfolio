@@ -1,5 +1,5 @@
 .budget-view-container {
-  padding: 16px;
+  padding: 16px 16px 0 16px;
   height: 100%;
   width: 100%;
   display: flex;
@@ -15,14 +15,28 @@
   flex-shrink: 0;
 }
 
+.spinner-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.spinner-container ::ng-deep .ant-spin-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .budgets-grid {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden;
   gap: 16px;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
   padding-bottom: 16px;
-  flex: 1; /* Take remaining height */
-  min-height: calc(100vh - 180px); /* Ensure minimum viewport height */
-  align-items: stretch; /* Cards stretch to full height */
 }
 
 .budget-card-wrapper {
