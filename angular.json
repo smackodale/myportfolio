@@ -54,6 +54,11 @@
                 "glob": "**/*",
                 "input": "node_modules/@ant-design/icons-angular/src/inline-svg/",
                 "output": "/assets/"
+              },
+              {
+                "glob": "staticwebapp.config.json",
+                "input": "src/config/",
+                "output": "/"
               }
             ],
             "styles": ["src/styles.css", "node_modules/ng-zorro-antd/ng-zorro-antd.min.css"]
