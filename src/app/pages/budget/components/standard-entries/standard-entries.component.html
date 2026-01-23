@@ -14,12 +14,12 @@
         <th>Type</th>
         <th>Amount</th>
         <th>Frequency</th>
-        <th>Next Occurrence</th>
+        <th>First Occurrence</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      @for (data of basicTable.data; track data.id) {
+      @for (data of basicTable.data; track data.name) {
         <tr>
           <td>{{ data.name }}</td>
           <td>
@@ -28,7 +28,7 @@
           <td>{{ data.amount | currency }}</td>
           <td>{{ data.frequency }}</td>
           <td>
-            {{ data.frequency !== 'Weekly' ? (data.nextOccurrence | date: 'dd/MM/yyyy') : '-' }}
+            {{ data.frequency !== 'Weekly' ? (data.firstOccurrence | date: 'dd/MM/yyyy') : '-' }}
           </td>
           <td>
             <a (click)="openEditModal(data)">Edit</a>
@@ -36,7 +36,7 @@
             <a
               nz-popconfirm
               nzPopconfirmTitle="Sure to delete?"
-              (nzOnConfirm)="deleteEntry(data.id)"
+              (nzOnConfirm)="deleteEntry(data.name)"
               >Delete</a
             >
           </td>
@@ -96,13 +96,16 @@
           </nz-form-control>
         </nz-form-item>
 
-        @if (showNextOccurrence()) {
+        @if (showFirstOccurrence()) {
           <nz-form-item>
-            <nz-form-label [nzSm]="8" [nzXs]="24" nzRequired nzFor="nextOccurrence"
-              >Next Occurrence</nz-form-label
+            <nz-form-label [nzSm]="8" [nzXs]="24" nzRequired nzFor="firstOccurrence"
+              >First Occurrence</nz-form-label
             >
             <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Please select data">
-              <nz-date-picker formControlName="nextOccurrence" id="nextOccurrence"></nz-date-picker>
+              <nz-date-picker
+                formControlName="firstOccurrence"
+                id="firstOccurrence"
+              ></nz-date-picker>
             </nz-form-control>
           </nz-form-item>
         }

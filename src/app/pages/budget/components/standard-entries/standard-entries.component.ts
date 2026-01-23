@@ -73,8 +73,8 @@ export class StandardEntriesComponent implements OnInit {
   isEditMode = signal(false);
   currentEntryId: string | null = null;
 
-  // Helpers for NextOccurrence visibility
-  readonly showNextOccurrence = signal(true);
+  // Helpers for firstOccurrence visibility
+  readonly showFirstOccurrence = signal(true);
 
   constructor() {
     this.entryForm = this.fb.group({
@@ -82,20 +82,20 @@ export class StandardEntriesComponent implements OnInit {
       amount: [0, [Validators.required, Validators.min(0.01)]],
       type: ['Expense', [Validators.required]],
       frequency: [Frequency.Monthly, [Validators.required]],
-      nextOccurrence: [null],
+      firstOccurrence: [null],
     });
 
-    // Watch frequency changes to toggle validation/visibility of NextOccurrence
+    // Watch frequency changes to toggle validation/visibility of firstOccurrence
     this.entryForm.get('frequency')?.valueChanges.subscribe((val) => {
       if (val === Frequency.Weekly) {
-        this.entryForm.get('nextOccurrence')?.clearValidators();
-        this.entryForm.get('nextOccurrence')?.setValue(null);
-        this.showNextOccurrence.set(false);
+        this.entryForm.get('firstOccurrence')?.clearValidators();
+        this.entryForm.get('firstOccurrence')?.setValue(null);
+        this.showFirstOccurrence.set(false);
       } else {
-        this.entryForm.get('nextOccurrence')?.setValidators(Validators.required);
-        this.showNextOccurrence.set(true);
+        this.entryForm.get('firstOccurrence')?.setValidators(Validators.required);
+        this.showFirstOccurrence.set(true);
       }
-      this.entryForm.get('nextOccurrence')?.updateValueAndValidity();
+      this.entryForm.get('firstOccurrence')?.updateValueAndValidity();
     });
   }
 
@@ -112,13 +112,13 @@ export class StandardEntriesComponent implements OnInit {
 
   openEditModal(entry: StandardEntry) {
     this.isEditMode.set(true);
-    this.currentEntryId = entry.id;
+    this.currentEntryId = entry.name;
     this.entryForm.patchValue({
       name: entry.name,
       amount: entry.amount,
       type: entry.type,
       frequency: entry.frequency,
-      nextOccurrence: entry.nextOccurrence ? new Date(entry.nextOccurrence) : null,
+      firstOccurrence: entry.firstOccurrence ? new Date(entry.firstOccurrence) : null,
     });
     this.isModalVisible.set(true);
   }
@@ -130,15 +130,21 @@ export class StandardEntriesComponent implements OnInit {
   handleOk() {
     if (this.entryForm.valid) {
       const formVal = this.entryForm.value;
-      const payload: Omit<StandardEntry, 'id'> = {
+      const payload: {
+        name: string;
+        amount: number;
+        type: EntryType;
+        frequency: Frequency;
+        firstOccurrence?: string;
+      } = {
         name: formVal.name,
         amount: formVal.amount,
         type: formVal.type,
         frequency: formVal.frequency,
       };
 
-      if (formVal.frequency !== Frequency.Weekly && formVal.nextOccurrence) {
-        payload.nextOccurrence = formVal.nextOccurrence.toISOString();
+      if (formVal.frequency !== Frequency.Weekly && formVal.firstOccurrence) {
+        payload.firstOccurrence = formVal.firstOccurrence.toISOString();
       }
 
       if (this.isEditMode() && this.currentEntryId) {

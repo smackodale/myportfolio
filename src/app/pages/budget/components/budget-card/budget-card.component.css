@@ -1,3 +1,9 @@
+:host {
+  height: 100%;
+  min-height: calc(100vh - 220px);
+  display: block;
+}
+
 .budget-card {
   height: 100%;
   display: flex;
@@ -40,23 +46,52 @@
 .positive { color: #52c41a; }
 .negative { color: #ff4d4f; }
 
+.entries-section {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
 
+.entries-category {
+  margin-bottom: 16px;
+}
+
+.entries-category h4 {
+  font-size: 0.9em;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #666;
+}
 
 .entry-row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.9em;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  padding: 4px 0;
+}
+
+.entry-name {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.entry-amount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
 
 .past-budget {
   opacity: 0.6;
   background-color: #fafafa;
-}
-
-:host {
-  height: 100%;
-  display: block;
 }
 
 /* Ensure NzCard internal body stretches */
@@ -66,8 +101,18 @@
   flex-direction: column;
 }
 
-.entries-list {
-  flex: 1; /* Grow to fill space */
-  overflow-y: auto;
-  min-height: 0; /* Important for flex child scroll */
+.actions-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.add-entry-form {
+  margin-top: 12px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 4px;
 }

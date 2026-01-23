@@ -1,20 +1,20 @@
-import { Injectable, inject } from '@angular/core';
-import { State, Action, StateContext, Selector } from '@ngxs/store';
-import { catchError, tap } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
+import { Action, Selector, State, StateContext } from '@ngxs/store';
 import { throwError } from 'rxjs';
-import { Budget, StandardEntry } from '../../models/budget.model';
+import { catchError, tap } from 'rxjs/operators';
+import { Budget, BudgetEntry, StandardEntry } from '../../models/budget.model';
+import { BudgetApiService } from '../../services/budget-api.service';
+import { BudgetCalculationService } from '../../services/budget-calculation.service';
 import {
+  AddNextBudget,
+  AddStandardEntry,
+  DeleteStandardEntry,
   LoadBudgets,
   LoadStandardEntries,
-  AddStandardEntry,
-  UpdateStandardEntry,
-  DeleteStandardEntry,
   ResetBudgetToStandard,
-  TogglePastBudgets,
   UpdateBudgetEntry,
-  AddNextBudget,
+  UpdateStandardEntry,
 } from './budget.actions';
-import { BudgetApiService } from '../../services/budget-api.service';
 
 export interface BudgetStateModel {
   budgets: Budget[];
@@ -36,7 +36,8 @@ export interface BudgetStateModel {
 })
 @Injectable()
 export class BudgetState {
-  private budgetService = inject(BudgetApiService);
+  private apiService = inject(BudgetApiService);
+  private calculationService = inject(BudgetCalculationService);
 
   @Selector()
   static budgets(state: BudgetStateModel): Budget[] {
@@ -60,31 +61,11 @@ export class BudgetState {
 
   @Action(LoadBudgets)
   loadBudgets(ctx: StateContext<BudgetStateModel>, action: LoadBudgets) {
-    const state = ctx.getState();
-    ctx.patchState({ isLoading: true, error: null, showPast: action.showPast }); // sync toggle
+    ctx.patchState({ isLoading: true, error: null, showPast: action.showPast });
 
-    // Calculate Start Date
-    const today = new Date();
-    // If showing past, maybe go back 4 weeks?
-    // If not showing past, start from current week (Monday)
-    let startDate = new Date();
-    if (action.showPast) {
-      startDate.setDate(today.getDate() - 28); // 4 weeks ago
-    } else {
-      // Start of current week? Or today?
-      // Service logic handles alignment to Monday, so passing today is fine.
-      startDate = today;
-    }
-
-    // Calculate End Date
-    // "View at least 6 weeks in advance"
-    // Let's fetch 12 weeks to be safe and allow scrolling
-    // const endDate = new Date(startDate);
-    // endDate.setDate(startDate.getDate() + 12 * 7);
-
-    return this.budgetService.getBudgets(startDate).pipe(
+    return this.apiService.getBudgets().pipe(
       tap((budgets) => {
-        this.recalculateRunningSavingsAndPast(budgets);
+        this.calculationService.recalculateRunningSavingsAndPast(budgets);
         ctx.patchState({ budgets, isLoading: false });
       }),
       catchError((err) => {
@@ -97,7 +78,7 @@ export class BudgetState {
   @Action(LoadStandardEntries)
   loadStandardEntries(ctx: StateContext<BudgetStateModel>) {
     ctx.patchState({ isLoading: true });
-    return this.budgetService.getStandardEntries().pipe(
+    return this.apiService.getStandardEntries().pipe(
       tap((standardEntries) => {
         ctx.patchState({ standardEntries, isLoading: false });
       }),
@@ -110,7 +91,7 @@ export class BudgetState {
 
   @Action(AddStandardEntry)
   addStandardEntry(ctx: StateContext<BudgetStateModel>, action: AddStandardEntry) {
-    return this.budgetService.addStandardEntry(action.payload).pipe(
+    return this.apiService.createStandardEntry(action.payload).pipe(
       tap((newEntry) => {
         const state = ctx.getState();
         ctx.patchState({ standardEntries: [...state.standardEntries, newEntry] });
@@ -120,10 +101,12 @@ export class BudgetState {
 
   @Action(UpdateStandardEntry)
   updateStandardEntry(ctx: StateContext<BudgetStateModel>, action: UpdateStandardEntry) {
-    return this.budgetService.updateStandardEntry(action.id, action.payload).pipe(
+    return this.apiService.updateStandardEntry(action.id, action.payload).pipe(
       tap((updated) => {
         const state = ctx.getState();
-        const list = state.standardEntries.map((item) => (item.id === action.id ? updated : item));
+        const list = state.standardEntries.map((item) =>
+          item.name === action.id ? updated : item,
+        );
         ctx.patchState({ standardEntries: list });
       }),
     );
@@ -131,11 +114,11 @@ export class BudgetState {
 
   @Action(DeleteStandardEntry)
   deleteStandardEntry(ctx: StateContext<BudgetStateModel>, action: DeleteStandardEntry) {
-    return this.budgetService.deleteStandardEntry(action.id).pipe(
+    return this.apiService.deleteStandardEntry(action.id).pipe(
       tap(() => {
         const state = ctx.getState();
         ctx.patchState({
-          standardEntries: state.standardEntries.filter((e) => e.id !== action.id),
+          standardEntries: state.standardEntries.filter((e) => e.name !== action.id),
         });
       }),
     );
@@ -143,27 +126,102 @@ export class BudgetState {
 
   @Action(ResetBudgetToStandard)
   resetBudget(ctx: StateContext<BudgetStateModel>, action: ResetBudgetToStandard) {
-    return this.budgetService.resetBudget(action.weekId).pipe(
-      tap((newBudget) => {
-        const state = ctx.getState();
-        const budgets = state.budgets.map((b) => (b.weekId === action.weekId ? newBudget : b));
+    const state = ctx.getState();
+    const budget = state.budgets.find((b) => b.weekId === action.weekId);
 
-        this.recalculateRunningSavingsAndPast(budgets);
+    if (!budget) {
+      return throwError(() => new Error('Budget not found'));
+    }
 
-        ctx.patchState({ budgets });
-      }),
-    );
+    // Keep only manual entries
+    const manualEntries = budget.entries.filter((entry) => !entry.isStandard);
+
+    // Parse weekId to get dates
+    const [yearStr, weekStr] = action.weekId.split('-W');
+    const year = parseInt(yearStr);
+    const week = parseInt(weekStr);
+    const weekStart = this.calculationService.getDateFromWeek(year, week);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    // Generate new standard entries for this week
+    const standardEntries = state.standardEntries;
+    const newStandardEntries = standardEntries
+      .filter((std) => this.calculationService.shouldApplyToWeek(std, weekStart, weekEnd))
+      .map((std) => ({
+        id: crypto.randomUUID(),
+        name: std.name,
+        amount: std.amount,
+        type: std.type,
+        isStandard: true,
+      }));
+
+    // Merge entries
+    const mergedEntries = [...manualEntries, ...newStandardEntries];
+
+    // Recalculate totals
+    const { totalIncome, totalExpenses, weekTotal } =
+      this.calculationService.calculateTotals(mergedEntries);
+
+    // Update via API
+    return this.apiService
+      .updateBudget(action.weekId, {
+        entries: mergedEntries,
+        totalIncome,
+        totalExpenses,
+        weekTotal,
+      })
+      .pipe(
+        tap((updatedBudget) => {
+          const budgets = state.budgets.map((b) =>
+            b.weekId === action.weekId ? updatedBudget : b,
+          );
+          this.calculationService.recalculateRunningSavingsAndPast(budgets);
+          ctx.patchState({ budgets });
+        }),
+      );
   }
 
   @Action(AddNextBudget)
   addNextBudget(ctx: StateContext<BudgetStateModel>) {
-    return this.budgetService.addNextBudget().pipe(
-      tap((newBudget) => {
-        const state = ctx.getState();
-        const budgets = [...state.budgets, newBudget];
+    const state = ctx.getState();
 
-        this.recalculateRunningSavingsAndPast(budgets);
+    // Find latest budget date
+    let maxStoredDate: Date | null = null;
+    state.budgets.forEach((b) => {
+      const d = new Date(b.startDate);
+      if (!maxStoredDate || d > maxStoredDate) {
+        maxStoredDate = d;
+      }
+    });
 
+    // Calculate next week start
+    let nextStart: Date;
+    if (maxStoredDate) {
+      nextStart = new Date(maxStoredDate);
+      nextStart.setDate(nextStart.getDate() + 7);
+    } else {
+      // Start of current week if nothing exists
+      nextStart = this.calculationService.getMondayOfWeek(new Date());
+    }
+
+    const nextEnd = new Date(nextStart);
+    nextEnd.setDate(nextStart.getDate() + 6);
+    nextEnd.setHours(23, 59, 59, 999);
+
+    // Generate budget using calculation service
+    const newBudget = this.calculationService.generateBudgetForWeek(
+      nextStart,
+      nextEnd,
+      state.standardEntries,
+    );
+
+    // Create via API
+    return this.apiService.createBudget(newBudget).pipe(
+      tap((createdBudget) => {
+        const budgets = [...state.budgets, createdBudget];
+        this.calculationService.recalculateRunningSavingsAndPast(budgets);
         ctx.patchState({ budgets });
       }),
     );
@@ -172,65 +230,51 @@ export class BudgetState {
   @Action(UpdateBudgetEntry)
   updateBudgetEntry(ctx: StateContext<BudgetStateModel>, action: UpdateBudgetEntry) {
     const state = ctx.getState();
-    const budgetIndex = state.budgets.findIndex((b) => b.weekId === action.weekId);
-    if (budgetIndex > -1) {
-      const budget = { ...state.budgets[budgetIndex] };
-      const entryIndex = budget.entries.findIndex((e) => e.id === action.entryId);
-      if (entryIndex > -1) {
-        const updatedEntry = { ...budget.entries[entryIndex], ...action.payload };
-        const newEntries = [...budget.entries];
-        newEntries[entryIndex] = updatedEntry;
+    const budget = state.budgets.find((b) => b.weekId === action.weekId);
 
-        const totalIncome = newEntries
-          .filter((e) => e.type === 'Income')
-          .reduce((s, e) => s + e.amount, 0);
-        const totalExpenses = newEntries
-          .filter((e) => e.type === 'Expense')
-          .reduce((s, e) => s + e.amount, 0);
-
-        const newBudget = {
-          ...budget,
-          entries: newEntries,
-          totalIncome,
-          totalExpenses,
-          weekTotal: totalIncome - totalExpenses,
-        };
-
-        this.budgetService.updateBudget(newBudget).subscribe();
-
-        const newBudgets = [...state.budgets];
-        newBudgets[budgetIndex] = newBudget;
-
-        this.recalculateRunningSavingsAndPast(newBudgets);
-
-        ctx.patchState({ budgets: newBudgets });
-      }
+    if (!budget) {
+      return throwError(() => new Error('Budget not found'));
     }
-  }
 
-  private recalculateRunningSavingsAndPast(budgets: Budget[]) {
-    // We assume the budgets are sorted by date implicitly by generation
-    // If not, we should sort them here:
-    // budgets.sort((a,b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    const entryIndex = budget.entries.findIndex((e) => e.id === action.entryId);
+    let updatedEntries: BudgetEntry[];
 
-    // Sort just in case? Service returns generated order, so it should be fine.
+    if (entryIndex === -1) {
+      // Entry doesn't exist - add new entry
+      const newEntry: BudgetEntry = {
+        id: action.entryId,
+        name: action.payload.name || '',
+        amount: action.payload.amount || 0,
+        type: action.payload.type || 'Expense',
+        isStandard: action.payload.isStandard ?? false,
+      };
+      updatedEntries = [...budget.entries, newEntry];
+    } else {
+      // Entry exists - update it
+      updatedEntries = [...budget.entries];
+      updatedEntries[entryIndex] = { ...updatedEntries[entryIndex], ...action.payload };
+    }
 
-    const now = new Date();
+    // Recalculate totals
+    const { totalIncome, totalExpenses, weekTotal } =
+      this.calculationService.calculateTotals(updatedEntries);
 
-    budgets
-      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
-      .reduce((running, b) => {
-        // calc/update isPast
-        const end = new Date(b.endDate);
-        b.isPast = end < now;
-
-        if (b.isPast) {
-          b.runningSavings = 0;
-        } else {
-          b.runningSavings = running + b.weekTotal;
-        }
-
-        return b.runningSavings;
-      }, 0);
+    // Update via API
+    return this.apiService
+      .updateBudget(action.weekId, {
+        entries: updatedEntries,
+        totalIncome,
+        totalExpenses,
+        weekTotal,
+      })
+      .pipe(
+        tap((updatedBudget) => {
+          const budgets = state.budgets.map((b) =>
+            b.weekId === action.weekId ? updatedBudget : b,
+          );
+          this.calculationService.recalculateRunningSavingsAndPast(budgets);
+          ctx.patchState({ budgets });
+        }),
+      );
   }
 }
